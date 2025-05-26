@@ -1,16 +1,64 @@
-# finance_control
+# 📊 Finance Control
 
-A new Flutter project.
+A Flutter application for managing personal income and expenses in a simple, visual, and intuitive way.
 
-## Getting Started
+![Flutter](https://img.shields.io/badge/Flutter-3.0-blue?logo=flutter)
+![Hive](https://img.shields.io/badge/Hive-Persistence-green)
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## ✨ Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Register **transactions** with:
+  - Amount
+  - Description
+  - Date
+  - Category (income or expense)
+- **Customizable categories** (create and delete)
+- **Monthly summary** of income, expenses, and balance
+- **Graphical history** of monthly balances (bar chart)
+- **Local data persistence** using Hive
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🖼️ Screenshots (optional)
+
+<sub>Add usage images of the app here if desired</sub>
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone this repository
+
+```bash
+git clone https://github.com/hobbydev87/finance_control.git
+cd finance_control
+2. Install dependencies
+bash
+flutter pub get
+3. Run the app
+bash
+flutter run
+Make sure you have an emulator or a connected device ready.
+
+📦 Main Dependencies
+Flutter
+Hive
+fl_chart
+intl
+path_provider
+
+🔐 Data Persistence
+Data is stored locally using Hive, so no internet connection is required.
+
+🛠️ TODO / Future Improvements
+ Export data to CSV/Excel
+ Dark mode
+ Budgets by category
+ Cloud sync
+
+🧑‍💻 Author
+hobbydev87
+📧 [muntean2009@gmail.com]
+🔗 github.com/hobbydev87
