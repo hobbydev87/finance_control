@@ -7,6 +7,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'pages/nueva_transaccion_page.dart';
 
+class FiltroTransacciones {
+  final Categoria? categoria;
+  final DateTime? desde;
+  final DateTime? hasta;
+
+  FiltroTransacciones({this.categoria, this.desde, this.hasta});
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
@@ -43,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   List<Transaccion> _transacciones = [];
   List<Categoria> _categorias = [];
+  FiltroTransacciones _filtro = FiltroTransacciones();
 
   @override
   void initState() {
@@ -78,18 +87,119 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _mostrarDialogoFiltro() async {
+    DateTime? desde = _filtro.desde;
+    DateTime? hasta = _filtro.hasta;
+    Categoria? categoriaSeleccionada = _filtro.categoria;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Filtrar Transacciones'),
+        content: StatefulBuilder(
+          builder: (context, setStateDialog) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<Categoria>(
+                value: categoriaSeleccionada,
+                hint: Text('Selecciona categoría'),
+                isExpanded: true,
+                items: _categorias.map((cat) => DropdownMenuItem(
+                  value: cat,
+                  child: Text(cat.nombre),
+                )).toList(),
+                onChanged: (value) => setStateDialog(() => categoriaSeleccionada = value),
+              ),
+              SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: desde ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setStateDialog(() => desde = picked);
+                },
+                child: Text(desde == null ? 'Desde' : 'Desde: ${DateFormat("yyyy-MM-dd").format(desde!)}'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: hasta ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setStateDialog(() => hasta = picked);
+                },
+                child: Text(hasta == null ? 'Hasta' : 'Hasta: ${DateFormat("yyyy-MM-dd").format(hasta!)}'),
+              ),
+              if (_filtro.categoria != null || _filtro.desde != null || _filtro.hasta != null)
+                TextButton(
+                  onPressed: () {
+                    setState(() => _filtro = FiltroTransacciones());
+                    Navigator.pop(context);
+                  },
+                  child: Text('Limpiar Filtros'),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              setState(() => _filtro = FiltroTransacciones(
+                categoria: categoriaSeleccionada,
+                desde: desde,
+                hasta: hasta,
+              ));
+              Navigator.pop(context);
+            },
+            child: Text('Aplicar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Transaccion> _aplicarFiltro(List<Transaccion> lista) {
+    return lista.where((t) {
+      final enRangoFecha = (_filtro.desde == null || !t.fecha.isBefore(_filtro.desde!)) &&
+          (_filtro.hasta == null || !t.fecha.isAfter(_filtro.hasta!));
+      final mismaCategoria = _filtro.categoria == null || t.categoria.id == _filtro.categoria!.id;
+      return enRangoFecha && mismaCategoria;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final transaccionesFiltradas = _aplicarFiltro(_transacciones);
+
     final pages = <Widget>[
-      TransactionListPage(transacciones: _transacciones),
-      SummaryPage(transacciones: _transacciones),
-      HistoryPage(transacciones: _transacciones),
+      TransactionListPage(transacciones: transaccionesFiltradas),
+      SummaryPage(transacciones: transaccionesFiltradas),
+      HistoryPage(transacciones: transaccionesFiltradas),
       CategoriesPage(),
     ];
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Mi Presupuesto'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.filter_alt),
+            onPressed: _mostrarDialogoFiltro,
+            tooltip: 'Filtrar',
+          ),
+          if (_filtro.categoria != null || _filtro.desde != null || _filtro.hasta != null)
+            IconButton(
+              icon: Icon(Icons.clear),
+              onPressed: () => setState(() => _filtro = FiltroTransacciones()),
+              tooltip: 'Limpiar filtro',
+            ),
+        ],
       ),
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -123,7 +233,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// El resto del código permanece igual (TransactionListPage, SummaryPage, HistoryPage, CategoriaManagerPage...)
+// TransactionListPage, SummaryPage, HistoryPage, CategoriesPage... sin cambios, ya reciben la lista filtrada
 
 // TransactionListPage
 class TransactionListPage extends StatefulWidget {

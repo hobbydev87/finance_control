@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:finance_control/models/categoria.dart';
 import 'package:finance_control/models/transaccion.dart';
 
+class FiltroTransacciones {
+  final Categoria? categoria;
+  final DateTime? desde;
+  final DateTime? hasta;
+
+  FiltroTransacciones({this.categoria, this.desde, this.hasta});
+}
+
 class NuevaTransaccionPage extends StatefulWidget {
   final List<Categoria> categoriasDisponibles;
   final Transaccion? transaccionExistente;
@@ -33,7 +41,6 @@ class _NuevaTransaccionPageState extends State<NuevaTransaccionPage> {
       _montoController.text = t.monto.toString();
       _fecha = t.fecha;
 
-      // Buscar la instancia de categoría equivalente por ID
       final match = widget.categoriasDisponibles.firstWhere(
         (cat) => cat.id == t.categoria.id,
         orElse: () => widget.categoriasDisponibles.first,
@@ -106,7 +113,7 @@ class _NuevaTransaccionPageState extends State<NuevaTransaccionPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Categoria>(
-                value: _categoriaSeleccionada,
+                value: widget.categoriasDisponibles.contains(_categoriaSeleccionada) ? _categoriaSeleccionada : null,
                 decoration: const InputDecoration(labelText: 'Categoría'),
                 items: widget.categoriasDisponibles.map((categoria) {
                   return DropdownMenuItem<Categoria>(
